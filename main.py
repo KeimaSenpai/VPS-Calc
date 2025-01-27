@@ -51,20 +51,21 @@ def main(page: ft.Page):
         )
         page.update()
     
+    # Actualizado para que los numeros de arriba  tambien actualicen
     def create_counter(label, unit, initial_value, min_value=1):
-        value_text = ft.Text(
+        # Text para el valor superior
+        header_value = ft.Text(
             str(initial_value),
             size=20,
             weight=ft.FontWeight.BOLD,
-            color=ft.Colors.BLUE,
-            text_align=ft.TextAlign.CENTER,
         )
         
         def decrease(e):
             nonlocal initial_value
             if initial_value > min_value:
                 initial_value -= 1
-                value_text.value = str(initial_value)
+                # Actualizamos el texto del header
+                header_value.value = str(initial_value)
                 if label == "RAM":
                     nonlocal ram_value
                     ram_value = initial_value
@@ -83,7 +84,8 @@ def main(page: ft.Page):
         def increase(e):
             nonlocal initial_value
             initial_value += 1
-            value_text.value = str(initial_value)
+            # Actualizamos el texto del header
+            header_value.value = str(initial_value)
             if label == "RAM":
                 nonlocal ram_value
                 ram_value = initial_value
@@ -104,7 +106,7 @@ def main(page: ft.Page):
                 ft.Text(unit, size=12),
                 ft.Row(
                     controls=[
-                        ft.Text(str(initial_value), size=20, weight=ft.FontWeight.BOLD),
+                        header_value,
                         ft.Text(label, size=20, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
@@ -120,7 +122,6 @@ def main(page: ft.Page):
                                     bgcolor=ft.Colors.BLUE,
                                 ),
                             ),
-                            value_text,
                             ft.IconButton(
                                 ft.Icons.ADD,
                                 on_click=increase,
@@ -160,7 +161,7 @@ def main(page: ft.Page):
     )
 
     transferencia_check = ft.Checkbox(
-        label="Agregar transferencia adicional (+250 CUP)",
+        label="Transferencia adicional (+250 CUP)",
         on_change=calcular_costo
     )
 
@@ -171,14 +172,14 @@ def main(page: ft.Page):
                     precio_total,
                     ft.Row(
                         controls=[
-                            create_counter("RAM", "Gb", ram_value),
+                            create_counter("RAM", "GB", ram_value),
                             create_counter("CPU", "Unidad", cpu_value),
                         ],
                         alignment=ft.MainAxisAlignment.SPACE_AROUND,
                     ),
                     ft.Row(
                         controls=[
-                            create_counter("SSD", "Gb", ssd_value),
+                            create_counter("SSD", "GB", ssd_value),
                             create_counter("DÍAS", "24/h", dias_value),
                         ],
                         alignment=ft.MainAxisAlignment.SPACE_AROUND,
@@ -197,7 +198,7 @@ def main(page: ft.Page):
                 controls=[
                     ft.Text(
                         "Acerca de VPS Calculator",
-                        size=30,
+                        size=20,
                         weight=ft.FontWeight.BOLD,
                         color=ft.Colors.BLUE,
                     ),
@@ -263,7 +264,7 @@ def main(page: ft.Page):
 
     container.content = build_home_view()
     page.appbar = ft.AppBar(
-        leading_width=40,
+        leading_width=45,
         title=ft.Text("VPS Calculator", weight=ft.FontWeight.BOLD, size=20),
         # center_title=True,
         bgcolor=ft.Colors.BLUE,

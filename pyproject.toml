@@ -5,7 +5,7 @@ description = "App para calcular el costo de VPS en Cuba"
 authors = [
   {name = "KeimaSenpai", email = "KeimaSenpai@proton.me"}
 ]
-dependencies = ["flet==0.25.0"]
+dependencies = ["flet==0.26.0"]
 
 
 [tool.flet]
