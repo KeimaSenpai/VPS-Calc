@@ -203,7 +203,7 @@ def main(page: ft.Page):
                         color=ft.Colors.BLUE,
                     ),
                     ft.Text(
-                        "Versión 1.0.0",
+                        "Versión 1.0.1",
                         size=16,
                     ),
                     ft.Container(
