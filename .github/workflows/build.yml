@@ -1,4 +1,4 @@
-name: IPA Build
+name: IPA APK Build
 
 on:
   # Allows you to run this workflow manually from the Actions tab of the repository
@@ -12,7 +12,7 @@ env:
   FLUTTER_VERSION: 3.27.0
 
 jobs:
-  build:
+  build-ipa:
     runs-on: macos-latest
 
     steps:
@@ -46,9 +46,52 @@ jobs:
         path: build/ipa  # location of Flet build output
         if-no-files-found: error  # Fail the action with an error message if no files are found
         overwrite: false  # If true, an artifact with a matching name will be deleted before a new one is uploaded. If false, the action will fail if an artifact for the given name already exists. Does not fail if the artifact does not exist.
+  
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Setup Flutter ${{ env.FLUTTER_VERSION }}
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4.2.1
+      with:
+        distribution: 'temurin' # See https://github.com/marketplace/actions/setup-java-jdk#supported-distributions for available options
+        java-version: '21'
+
+    - name: Flet Build APK
+      run: |
+        flutter config --no-analytics # disable flutter analytics
+        flet build apk --verbose    # adapt the command to your needs - https://flet.dev/docs/publish 
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4.3.4  # https://github.com/marketplace/actions/upload-a-build-artifact
+      with:
+        name: apk-flet  # the name of the artifact
+        path: build/apk  # location of Flet build output
+        if-no-files-found: error  # Fail the action with an error message if no files are found
+        overwrite: false  # If true, an artifact with a matching name will be deleted before a new one is uploaded. If false, the action will fail if an artifact for the given name already exists. Does not fail if the artifact does not exist.
+      
+
 
   create-release:
-    needs: [build]
+    needs: [build-apk, build-ipa]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -69,6 +112,8 @@ jobs:
         with:
           tag_name: v${{ env.BUILD_VERSION }}
           release_name: Release v${{ env.BUILD_VERSION }}
+          body: |
+            ## 🚀 Update ${{ env.BUILD_VERSION }}
           draft: false
           prerelease: false
 
@@ -88,6 +133,7 @@ jobs:
           zip -r ../ipa-flet.ipa Payload
           cd ..
 
+
       - name: List Workspace After Zipping
         run: |
           echo "Artifacts Directory After Zipping:"
@@ -98,6 +144,7 @@ jobs:
         with:
           files: |
             ls -la artifacts/
+            artifacts/apk-flet/app-release.apk
             artifacts/ipa-flet.ipa
           tag_name: v${{ env.BUILD_VERSION }}
         env:
